@@ -1,8 +1,11 @@
 import { useState } from 'react';
 
-// 3x3 grid. Cell 0 = door (must stay clear). Cell 2 = window (decorative).
 const DOOR_CELL = 0;
-const ITEMS = ['sofa', 'table', 'lamp'];
+const ITEMS = [
+  { key: 'sofa', name: '🛋️ Sofa' },
+  { key: 'table', name: '🪵 Table' },
+  { key: 'lamp', name: '💡 Lamp' },
+];
 
 function neighbors(index) {
   const row = Math.floor(index / 3);
@@ -16,19 +19,18 @@ function neighbors(index) {
 }
 
 export default function InteriorTask({ onComplete }) {
-  const [placements, setPlacements] = useState({}); // cellIndex -> item
+  const [placements, setPlacements] = useState({}); // cellIndex -> itemKey
   const [selectedItem, setSelectedItem] = useState('sofa');
   const [checked, setChecked] = useState(false);
 
-  function placedCellFor(item) {
-    return Object.entries(placements).find(([, v]) => v === item)?.[0];
+  function placedCellFor(itemKey) {
+    return Object.entries(placements).find(([, v]) => v === itemKey)?.[0];
   }
 
   function handleCellClick(index) {
-    if (index === DOOR_CELL) return; // can't block the door
+    if (index === DOOR_CELL) return; // door must remain open
     setPlacements((prev) => {
       const next = { ...prev };
-      // remove this item from any previous cell
       for (const key of Object.keys(next)) {
         if (next[key] === selectedItem) delete next[key];
       }
@@ -59,63 +61,92 @@ export default function InteriorTask({ onComplete }) {
 
   return (
     <div>
-      <h3>Mini Task: Interior Designer</h3>
-      <p style={{ marginTop: 8, marginBottom: 16 }}>
-        Arrange the sofa, table, and lamp in this room. Keep the door (top-left) clear,
-        and place the sofa near the table so conversation flows naturally.
-      </p>
+      <div style={{ marginBottom: 16 }}>
+        <h4 style={{ fontSize: '1.15rem', color: 'var(--accent-amber)' }}>Task: Room Spatial Layout Design</h4>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginTop: 4 }}>
+          Select an item below, then click a grid cell to position it. Keep the main entry door (top-left) unblocked, and place the sofa adjacent to the coffee table.
+        </p>
+      </div>
 
+      {/* Palette Selector */}
       <div style={{ display: 'flex', gap: 10, marginBottom: 16 }}>
         {ITEMS.map((item) => (
           <button
-            key={item}
-            className="option"
-            style={{ width: 'auto', margin: 0, borderColor: selectedItem === item ? 'var(--amber)' : undefined }}
-            onClick={() => setSelectedItem(item)}
+            key={item.key}
+            className="btn btn-secondary"
+            style={{
+              padding: '8px 16px',
+              fontSize: '0.9rem',
+              borderColor: selectedItem === item.key ? 'var(--accent-amber)' : 'rgba(255, 255, 255, 0.1)',
+              background: selectedItem === item.key ? 'rgba(255, 158, 59, 0.15)' : 'transparent',
+            }}
+            onClick={() => setSelectedItem(item.key)}
           >
-            {item}
+            {item.name}
           </button>
         ))}
       </div>
 
+      {/* Floor Plan Grid */}
       <div style={styles.grid}>
-        {Array.from({ length: 9 }).map((_, i) => (
-          <div
-            key={i}
-            onClick={() => handleCellClick(i)}
-            style={{
-              ...styles.cell,
-              background: i === DOOR_CELL ? '#f7ece9' : 'white',
-            }}
-          >
-            {i === DOOR_CELL ? 'door' : placements[i] || ''}
-          </div>
-        ))}
+        {Array.from({ length: 9 }).map((_, i) => {
+          const itemKey = placements[i];
+          const itemObj = ITEMS.find((it) => it.key === itemKey);
+          return (
+            <div
+              key={i}
+              onClick={() => handleCellClick(i)}
+              style={{
+                ...styles.cell,
+                background: i === DOOR_CELL ? 'rgba(239, 68, 68, 0.15)' : 'rgba(18, 24, 39, 0.8)',
+                borderColor: i === DOOR_CELL ? 'var(--danger)' : 'rgba(255, 255, 255, 0.12)',
+              }}
+            >
+              {i === DOOR_CELL ? (
+                <span style={{ fontSize: '0.75rem', color: '#FCA5A5', fontWeight: 600 }}>🚪 Entry Door</span>
+              ) : (
+                <span>{itemObj ? itemObj.name : 'Click to Place'}</span>
+              )}
+            </div>
+          );
+        })}
       </div>
 
-      <button className="btn" style={{ marginTop: 16 }} onClick={finish}>
-        Check Layout
-      </button>
+      <div style={{ marginTop: 20, display: 'flex', gap: 12, alignItems: 'center' }}>
+        <button className="btn" onClick={finish}>
+          Validate Floorplan →
+        </button>
 
-      {result && (
-        <p style={{ marginTop: 12 }}>
-          {result.passed
-            ? 'Nice — a clear entry and a layout that invites conversation.'
-            : `Needs adjustment: ${!result.doorClear ? 'the door is blocked. ' : ''}${!result.sofaNearTable ? 'sofa and table aren\'t close enough. ' : ''}${!result.lampPlaced ? 'lamp hasn\'t been placed yet.' : ''}`}
-        </p>
-      )}
+        {result && (
+          <span className={`badge ${result.passed ? 'badge-emerald' : 'badge-amber'}`}>
+            {result.passed ? '✓ Functional & Inviting Layout!' : '⚠️ Needs Adjustments'}
+          </span>
+        )}
+      </div>
     </div>
   );
 }
 
 const styles = {
   grid: {
-    display: 'grid', gridTemplateColumns: 'repeat(3, 80px)', gridTemplateRows: 'repeat(3, 80px)',
-    gap: 6,
+    display: 'grid',
+    gridTemplateColumns: 'repeat(3, 1fr)',
+    gap: 10,
+    maxWidth: 360,
   },
   cell: {
-    border: '1px solid #ccc', borderRadius: 6, display: 'flex',
-    alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
-    fontSize: '0.85rem', textTransform: 'capitalize',
+    height: 90,
+    borderRadius: 10,
+    border: '1.5px solid transparent',
+    display: 'flex',
+    alignItems: 'center',
+    justify: 'center',
+    cursor: 'pointer',
+    fontSize: '0.85rem',
+    fontWeight: 600,
+    color: 'var(--text-primary)',
+    textAlign: 'center',
+    padding: 6,
+    transition: 'all 0.2s ease',
   },
 };

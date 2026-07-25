@@ -1,10 +1,10 @@
 import { Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import ChatWidget from './components/ChatWidget';
 import Home from './pages/Home';
-import About from './pages/About';
-import HowItWorks from './pages/HowItWorks';
-import Quiz from './pages/Quiz';
+import CareerChatbot from './pages/CareerChatbot';
+import Roadmap from './pages/Roadmap';
 import News from './pages/News';
 import Contact from './pages/Contact';
 
@@ -14,13 +14,14 @@ export default function App() {
       <Navbar />
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/how-it-works" element={<HowItWorks />} />
-        <Route path="/quiz" element={<Quiz />} />
-        <Route path="/news" element={<News />} />
+        <Route path="/finder" element={<CareerChatbot />} />
+        <Route path="/roadmap" element={<Roadmap />} />
+        <Route path="/trends" element={<News />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/about" element={<Contact />} />
       </Routes>
       <Footer />
+      <ChatWidget />
     </>
   );
 }

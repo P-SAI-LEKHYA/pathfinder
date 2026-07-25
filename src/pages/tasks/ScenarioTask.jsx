@@ -11,18 +11,30 @@ export default function ScenarioTask({ career, onComplete }) {
 
   return (
     <div>
-      <h3>Mini Task: {career.name}</h3>
-      <p style={{ marginTop: 8, marginBottom: 16 }}>{prompt}</p>
-      {options.map((opt, i) => (
-        <button
-          key={i}
-          className={`option ${selected !== null ? (i === correct ? 'correct' : i === selected ? 'incorrect' : '') : ''}`}
-          onClick={() => selected === null && choose(i)}
-          disabled={selected !== null}
-        >
-          {opt}
-        </button>
-      ))}
+      <div style={{ marginBottom: 20 }}>
+        <h4 style={{ fontSize: '1.15rem', color: 'var(--accent-amber)' }}>
+          Real-World Scenario: {career.name}
+        </h4>
+        <p style={{ color: 'var(--text-primary)', fontSize: '1.05rem', marginTop: 8, lineHeight: 1.5 }}>
+          "{prompt}"
+        </p>
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {options.map((opt, i) => (
+          <button
+            key={i}
+            className={`option ${selected !== null ? (i === correct ? 'correct' : i === selected ? 'incorrect' : '') : ''}`}
+            onClick={() => selected === null && choose(i)}
+            disabled={selected !== null}
+          >
+            <span>{opt}</span>
+            {selected !== null && i === correct && (
+              <span className="badge badge-emerald" style={{ fontSize: '0.7rem' }}>✓ Optimal Decision</span>
+            )}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
